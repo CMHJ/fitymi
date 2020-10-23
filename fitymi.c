@@ -18,17 +18,23 @@ main(int argc, char const *argv[])
     const double scalingFactor = getScalingFactor(5, 10);
     printf("Time scale: %f\n", scalingFactor);
 
-    struct timespec ts;
-    ts.tv_sec = 1;
-    ts.tv_nsec = 0;
     long ts1 = getCurrentTimeStampMilliseconds();
-    nanosleep(&ts, NULL);
+    usleep(1000);
     long ts2 = getCurrentTimeStampMilliseconds();
     printf("Time passed from sleeping: %ld\n", ts2 - ts1);
     return 0;
 }
 
 // FUNCTION DEFINITIONS
+
+void
+usleep(int milliseconds)
+{
+    struct timespec ts;
+    ts.tv_sec = milliseconds / 1000;
+    ts.tv_nsec = (milliseconds % 1000) * 1000000;
+    nanosleep(&ts, NULL);
+}
 
 long
 getCurrentTimeStampMilliseconds()

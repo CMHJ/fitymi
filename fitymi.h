@@ -16,6 +16,9 @@
 
 // FUNCTION DECLARATIONS
 
+void
+usleep(int milliseconds);
+
 long
 getCurrentTimeStampMilliseconds();
 
