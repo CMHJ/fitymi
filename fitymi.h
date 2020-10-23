@@ -3,16 +3,16 @@
  * Fake compiler for fun that emulates different build systems for asthetic
  */
 
+// INCLUDES
+#include <stdbool.h>
+
 // DEFINES
 
 #define _POSIX_C_SOURCE 199309L // To use the timestamp function in a POSIX way
 
-#define SCANNING Scanning dependencies of target
-#define BUILDING
-#define LINKING
-#define BUILT
+#define INTIAL_TIME_STEP_MS 1.0
 
-#define TIME_START 0.1
+#define STRING_BUF_SIZE 50
 
 // FUNCTION DECLARATIONS
 
@@ -38,10 +38,17 @@ void
 generateFileSystemTree();
 
 /**
- * Outputs the text for the fake build process for a given "file"
+ * Outputs the text for the fake build process for a given "target"
+ * @param targetName
+ * @param numSourceFiles
+ * @param isLib
+ * @param isStatic
  */
 void
-fakeBuildFile();
+fakeBuildTarget(long startTime, long buildTime, long targetBuildTimeMilliseconds, const char* targetName, int numSourceFiles, bool isLib, bool isStatic);
+
+int
+getBuildProgress(long startTime, long buildTime);
 
 // TYPE DECLARATIONS
 
