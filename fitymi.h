@@ -16,6 +16,7 @@
 // Colours
 #define COLOUR_GREEN "[0;32m"
 #define COLOUR_BOLD_GREEN "[1;32m"
+#define COLOUR_BOLD_BLUE "[1;34m"
 #define COLOUR_BOLD_MAGENTA "[1;35m"
 
 
