@@ -65,6 +65,7 @@ getScalingFactor(int nodes, int seconds)
 void
 fakeBuildTarget(long startTime, long buildTime, long targetBuildTimeMilliseconds, const char* targetName, int numSourceFiles, bool isLib, bool isStatic)
 {
+    char text[STRING_BUF_SIZE];
     // printf("build time: %d\n", (int)targetBuildTimeMilliseconds); // DEBUG
     double timeScalingFactor = getScalingFactor(4, (int)targetBuildTimeMilliseconds);
     int progress;
@@ -73,11 +74,14 @@ fakeBuildTarget(long startTime, long buildTime, long targetBuildTimeMilliseconds
     sleepTimeMilliseconds *= timeScalingFactor;
     // printf("build time to sleep: %d\n", sleepTimeMilliseconds); // DEBUG
 
-    printf("Scanning dependencies of target %s\n", targetName);
+    sprintf(text, "Scanning dependencies of target %s\n", targetName);
+    colourPrint(text, COLOUR_BOLD_MAGENTA);
     usleep(sleepTimeMilliseconds);
     progress = getBuildProgress(startTime, buildTime);
     // printf("Progress: %d\n", progress); // DEBUG
-    printf("[%3d%%] Building C object %s.c.o\n", progress, targetName);
+    printf("[%3d%%] ", progress);
+    sprintf(text, "Building C object %s.c.o\n", targetName);
+    colourPrint(text, COLOUR_GREEN);
     sleepTimeMilliseconds *= timeScalingFactor;
     // printf("build time to sleep: %d\n", sleepTimeMilliseconds); // DEBUG
     usleep(sleepTimeMilliseconds);
@@ -90,15 +94,21 @@ fakeBuildTarget(long startTime, long buildTime, long targetBuildTimeMilliseconds
 
     if(isLib && isStatic)
     {
-        printf("[%3d%%] Linking C static library lib%s.a\n", progress, targetNameLower);
+        printf("[%3d%%] ", progress);
+        sprintf(text, "Linking C static library lib%s.a\n", targetNameLower);
+        colourPrint(text, COLOUR_BOLD_GREEN);
     }
     else if (isLib)
     {
-        printf("[%3d%%] Linking C shared library lib%s.so\n", progress, targetNameLower);
+        printf("[%3d%%] ", progress);
+        sprintf(text, "Linking C shared library lib%s.so\n", targetNameLower);
+        colourPrint(text, COLOUR_BOLD_GREEN);
     }
     else
     {
-        printf("[%3d%%] Linking C executable %s\n", progress, targetName);
+        printf("[%3d%%] ", progress);
+        sprintf(text, "Linking C executable %s\n", targetName);
+        colourPrint(text, COLOUR_BOLD_GREEN);
     }
     sleepTimeMilliseconds *= timeScalingFactor;
     // printf("build time to sleep: %d\n", sleepTimeMilliseconds); // DEBUG
@@ -106,7 +116,8 @@ fakeBuildTarget(long startTime, long buildTime, long targetBuildTimeMilliseconds
     progress = getBuildProgress(startTime, buildTime);
     // printf("Progress: %d\n", progress); // DEBUG
 
-    printf("[%3d%%] Built target %s\n", progress, targetName);
+    printf("[%3d%%] ", progress);
+    printf("Built target %s\n", targetName);
 }
 
 int
@@ -119,6 +130,14 @@ getBuildProgress(long startTime, long buildTime)
     if(progress > 100) { progress = 100; }
 
     return progress;
+}
+
+void
+colourPrint(const char* text, const char* colour)
+{
+    printf("\033%s", colour);
+    printf("%s", text);
+    printf("\033[0m"); // Reset terminal output back to normal
 }
 
 // TYPE DEFINITIONS
