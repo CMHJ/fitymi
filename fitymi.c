@@ -8,6 +8,7 @@
 
 // Standard headers
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h> // For sleep
 #include <time.h> // For nanosleep, and timestamping
 #include <math.h>
@@ -17,17 +18,27 @@
 int
 main(int argc, char const *argv[])
 {
-    const long buildTime = 5 * 1000;
+    long buildTime = 100;
+    if (argc == 2)
+    {
+       buildTime = strtol(argv[1], (char **)NULL, 10);
+    }
+
     const long startTime = getCurrentTimeStampMilliseconds();
     // double timeScalingFactor = getScalingFactor(1, buildTime);
     printf("Start time: %ld\n", startTime);
 
+    // Generate a random number of targets with random names pulled from a dictionary
+    // Malloc array space for random number of targets
+    // Fill array with randomly pulled names from dictionary
+    // For all elements in the array build with exponentially scaling build time
+
     const double scalingFactor = getScalingFactor(5, 10);
     printf("Time scale: %f\n", scalingFactor);
 
-    // usleep(2500);
     // printf("Should be 50%%: %d%%\n", getBuildProgress(startTime, buildTime));
-    fakeBuildTarget(startTime, buildTime, buildTime, "myLib", 1, true, true);
+    fakeCmakeBuildTarget(startTime, buildTime, buildTime, "myLib", 1, true, true);
+    printf("Time taken to completion: %ld\n", (getCurrentTimeStampMilliseconds() - startTime));
 
     return 0;
 }
@@ -63,28 +74,32 @@ getScalingFactor(int nodes, int seconds)
 }
 
 void
-fakeBuildTarget(long startTime, long buildTime, long targetBuildTimeMilliseconds, const char* targetName, int numSourceFiles, bool isLib, bool isStatic)
+fakeCmakeBuildTarget(long startTime, long buildTime, long targetBuildTimeMilliseconds, const char* targetName, int numSourceFiles, bool isLib, bool isStatic)
 {
     char text[STRING_BUF_SIZE];
     // printf("build time: %d\n", (int)targetBuildTimeMilliseconds); // DEBUG
-    double timeScalingFactor = getScalingFactor(4, (int)targetBuildTimeMilliseconds);
+    // double timeScalingFactor = getScalingFactor(4, (int)targetBuildTimeMilliseconds);
+    long partBuildTime = buildTime / 3;
     int progress;
     // printf("scaling factor: %f\n", timeScalingFactor); // DEBUG
-    int sleepTimeMilliseconds = INTIAL_TIME_STEP_MS;
-    sleepTimeMilliseconds *= timeScalingFactor;
+    // int sleepTimeMilliseconds = INTIAL_TIME_STEP_MS;
+    // sleepTimeMilliseconds *= timeScalingFactor;
     // printf("build time to sleep: %d\n", sleepTimeMilliseconds); // DEBUG
 
     sprintf(text, "Scanning dependencies of target %s\n", targetName);
     colourPrint(text, COLOUR_BOLD_MAGENTA);
-    usleep(sleepTimeMilliseconds);
+    usleep(partBuildTime);
+
+    // Build random number of source files with target name plus random names picked from dictionary
+    // For source file need to follow pattern: TARGET_NAME/CMakeFiles/TARGETNAME.dir/SOURCE_FILE_NAME.c.o
     progress = getBuildProgress(startTime, buildTime);
     // printf("Progress: %d\n", progress); // DEBUG
     printf("[%3d%%] ", progress);
-    sprintf(text, "Building C object %s.c.o\n", targetName);
+    sprintf(text, "Building C object %s/CMakeFiles/%s.dir/%s.c.o\n", targetName, targetName, targetName);
     colourPrint(text, COLOUR_GREEN);
-    sleepTimeMilliseconds *= timeScalingFactor;
+    // sleepTimeMilliseconds *= timeScalingFactor;
     // printf("build time to sleep: %d\n", sleepTimeMilliseconds); // DEBUG
-    usleep(sleepTimeMilliseconds);
+    usleep(partBuildTime);
     progress = getBuildProgress(startTime, buildTime);
     // printf("Progress: %d\n", progress); // DEBUG
 
@@ -110,9 +125,9 @@ fakeBuildTarget(long startTime, long buildTime, long targetBuildTimeMilliseconds
         sprintf(text, "Linking C executable %s\n", targetName);
         colourPrint(text, COLOUR_BOLD_GREEN);
     }
-    sleepTimeMilliseconds *= timeScalingFactor;
+    // sleepTimeMilliseconds *= timeScalingFactor;
     // printf("build time to sleep: %d\n", sleepTimeMilliseconds); // DEBUG
-    usleep(sleepTimeMilliseconds);
+    usleep(partBuildTime);
     progress = getBuildProgress(startTime, buildTime);
     // printf("Progress: %d\n", progress); // DEBUG
 

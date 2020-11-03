@@ -51,7 +51,7 @@ generateFileSystemTree();
  * @param isStatic
  */
 void
-fakeBuildTarget(long startTime, long buildTime, long targetBuildTimeMilliseconds, const char* targetName, int numSourceFiles, bool isLib, bool isStatic);
+fakeCmakeBuildTarget(long startTime, long buildTime, long targetBuildTimeMilliseconds, const char* targetName, int numSourceFiles, bool isLib, bool isStatic);
 
 int
 getBuildProgress(long startTime, long buildTime);
