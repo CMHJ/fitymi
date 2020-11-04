@@ -18,27 +18,44 @@
 int
 main(int argc, char const *argv[])
 {
+    srand((unsigned)time(NULL)); // Seed random number generator
+
+    // Parse arguments
     long buildTime = 100;
     if (argc == 2)
     {
        buildTime = strtol(argv[1], (char **)NULL, 10);
+       buildTime *= 1000;
     }
+    const int maxTargets        = 5; // (TODO) Make an argument
+    const int maxSourceFiles    = 5; // (TODO) Make an argument
 
-    const long startTime = getCurrentTimeStampMilliseconds();
+    // Initialise constants
+    const long startTime        = getCurrentTimeStampMilliseconds();
+    const int numTargets        = rand() % maxTargets + 1;
+    const double scalingFactor  = getScalingFactor(numTargets, buildTime);
+    long targetBuildTime       = INTIAL_TIME_STEP_MS;
+    if(numTargets > 1) { targetBuildTime = buildTime; }
     // double timeScalingFactor = getScalingFactor(1, buildTime);
-    printf("Start time: %ld\n", startTime);
+
+    printf("Start time: %ld\n", startTime); // DEBUG
+    printf("Time scaling factor: %f\n", scalingFactor); // DEBUG
+    printf("Number of target: %d\n", numTargets); // DEBUG
 
     // Generate a random number of targets with random names pulled from a dictionary
     // Malloc array space for random number of targets
     // Fill array with randomly pulled names from dictionary
     // For all elements in the array build with exponentially scaling build time
 
-    const double scalingFactor = getScalingFactor(5, 10);
-    printf("Time scale: %f\n", scalingFactor);
-
     // printf("Should be 50%%: %d%%\n", getBuildProgress(startTime, buildTime));
-    fakeCmakeBuildTarget(startTime, buildTime, buildTime, "myLib", 1, true, true);
-    printf("Time taken to completion: %ld\n", (getCurrentTimeStampMilliseconds() - startTime));
+    for(int i = 0; i < numTargets; i++)
+    {
+        long targetStartTime = getCurrentTimeStampMilliseconds();
+        fakeCmakeBuildTarget(startTime, buildTime, targetBuildTime, "myLib", 1, true, true);
+        targetBuildTime *= scalingFactor;
+        printf("Target time taken to completion: %ld\n", (getCurrentTimeStampMilliseconds() - targetStartTime));
+    }
+    printf("Total time taken to completion: %ld\n", (getCurrentTimeStampMilliseconds() - startTime));
 
     return 0;
 }
@@ -63,10 +80,10 @@ getCurrentTimeStampMilliseconds()
 }
 
 double
-getScalingFactor(int nodes, int seconds)
+getScalingFactor(int nodes, int milliseconds)
 {
     double scalingFactor, x, y;
-    x = INTIAL_TIME_STEP_MS/seconds;
+    x = INTIAL_TIME_STEP_MS/milliseconds;
     y = 1.0/(nodes - 1.0);
     scalingFactor = 1.0/(pow(x, y));
 
