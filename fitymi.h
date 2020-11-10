@@ -11,7 +11,8 @@
 #define _POSIX_C_SOURCE 199309L // To use the timestamp function in a POSIX way
 
 #define INTIAL_TIME_STEP_MS 1.0
-#define STRING_BUF_SIZE 50
+#define FORMAT_STRING_BUF_SIZE 100
+#define TEMP_STRING_BUF_SIZE 50
 
 // Colours
 #define COLOUR_GREEN "[0;32m"
@@ -51,7 +52,7 @@ generateFileSystemTree();
  * @param isStatic
  */
 void
-fakeCmakeBuildTarget(long startTime, long buildTime, long targetBuildTimeMilliseconds, const char* targetName, int numSourceFiles, bool isLib, bool isStatic);
+fakeCmakeBuildTarget(long startTime, long buildTime, long targetBuildTimeMilliseconds, const char* targetName, int maxSourceFiles);
 
 int
 getBuildProgress(long startTime, long buildTime);

@@ -28,18 +28,19 @@ main(int argc, char const *argv[])
        buildTime *= 1000;
     }
     const int maxTargets        = 5; // (TODO) Make an argument
-    const int maxSourceFiles    = 5; // (TODO) Make an argument
+    // const int maxSourceFiles    = 5; // (TODO) Make an argument
 
     // Initialise constants
     const long startTime        = getCurrentTimeStampMilliseconds();
     const int numTargets        = rand() % maxTargets + 1;
     const double scalingFactor  = getScalingFactor(numTargets, buildTime);
-    long targetBuildTime       = INTIAL_TIME_STEP_MS;
-    if(numTargets > 1) { targetBuildTime = buildTime; }
+    long targetBuildTime        = INTIAL_TIME_STEP_MS;
+    if(numTargets == 1) { targetBuildTime = buildTime; }
     // double timeScalingFactor = getScalingFactor(1, buildTime);
 
     printf("Start time: %ld\n", startTime); // DEBUG
     printf("Time scaling factor: %f\n", scalingFactor); // DEBUG
+    printf("Build time: %ld\n", buildTime); // DEBUG
     printf("Number of target: %d\n", numTargets); // DEBUG
 
     // Generate a random number of targets with random names pulled from a dictionary
@@ -51,7 +52,8 @@ main(int argc, char const *argv[])
     for(int i = 0; i < numTargets; i++)
     {
         long targetStartTime = getCurrentTimeStampMilliseconds();
-        fakeCmakeBuildTarget(startTime, buildTime, targetBuildTime, "myLib", 1, true, true);
+        printf("Target build time: %ld\n", targetBuildTime); // DEBUG
+        fakeCmakeBuildTarget(startTime, buildTime, targetBuildTime, "myLib", 1);
         targetBuildTime *= scalingFactor;
         printf("Target time taken to completion: %ld\n", (getCurrentTimeStampMilliseconds() - targetStartTime));
     }
@@ -91,12 +93,15 @@ getScalingFactor(int nodes, int milliseconds)
 }
 
 void
-fakeCmakeBuildTarget(long startTime, long buildTime, long targetBuildTimeMilliseconds, const char* targetName, int numSourceFiles, bool isLib, bool isStatic)
+fakeCmakeBuildTarget(long startTime, long buildTime, long targetBuildTimeMilliseconds, const char* targetName, int maxSourceFiles)
 {
-    char text[STRING_BUF_SIZE];
+    bool isStatic = true;
+    bool isLib = true;
+    char text[FORMAT_STRING_BUF_SIZE];
     // printf("build time: %d\n", (int)targetBuildTimeMilliseconds); // DEBUG
     // double timeScalingFactor = getScalingFactor(4, (int)targetBuildTimeMilliseconds);
-    long partBuildTime = buildTime / 3;
+    // const long targetBuildStartTime = getCurrentTimeStampMilliseconds();
+    long partBuildTime = targetBuildTimeMilliseconds / 3;
     int progress;
     // printf("scaling factor: %f\n", timeScalingFactor); // DEBUG
     // int sleepTimeMilliseconds = INTIAL_TIME_STEP_MS;
@@ -120,7 +125,7 @@ fakeCmakeBuildTarget(long startTime, long buildTime, long targetBuildTimeMillise
     progress = getBuildProgress(startTime, buildTime);
     // printf("Progress: %d\n", progress); // DEBUG
 
-    char targetNameLower[STRING_BUF_SIZE]; // (TODO) Don't like this static array size
+    char targetNameLower[TEMP_STRING_BUF_SIZE]; // (TODO) Don't like this static array size
     strcpy(targetNameLower, targetName);
     for (int i = 0; targetNameLower[i]; ++i) targetNameLower[i] = tolower(targetNameLower[i]);
 
