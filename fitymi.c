@@ -1,6 +1,8 @@
 /**
  * Fake It Till You Make It
  * Fake compiler for fun that emulates different build systems for asthetics
+ *
+ * @todo need to make % complete relative to number of files being build rather than time
  */
 
 // My headers
