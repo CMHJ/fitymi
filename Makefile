@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-Wall -std=c99
+CFLAGS=-ansi -Wall -std=c99
 LIBS=-lm
 BINS=fitymi
 OBJS=fitymi.o
