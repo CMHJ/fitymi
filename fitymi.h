@@ -52,10 +52,10 @@ generateFileSystemTree();
  * @param isStatic
  */
 void
-fakeCmakeBuildTarget(long startTime, long buildTime, long targetBuildTimeMilliseconds, const char* targetName, int maxSourceFiles);
+fakeBuildTarget(int startPercent, int targetPercent, long targetBuildTimeMilliseconds, const char* targetName, int maxSourceFiles);
 
-int
-getBuildProgress(long startTime, long buildTime);
+void
+updateBuildProgress(int* startPercent, long buildPercent);
 
 void
 colourPrint(const char* text, const char* colour);
