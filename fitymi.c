@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <unistd.h> // For sleep
 #include <time.h> // For nanosleep, and timestamping
 #include <math.h>
@@ -27,31 +28,32 @@ main(int argc, char const *argv[])
     srand((unsigned)time(NULL)); // Seed random number generator
 
     // Parse arguments
-    long totalBuildTime = 1000;
+    double totalBuildTime = 10000.0;
     if (argc == 2)
     {
        totalBuildTime = strtol(argv[1], (char **)NULL, 10);
-       totalBuildTime *= 1000;
+       totalBuildTime *= 1000.0; // Convert to ms
     }
-    const uint8_t maxTargets = 5; // (TODO) Make an argument
-    const uint8_t maxSourceFiles = 5; // (TODO) Make an argument
+    // const uint8_t maxTargets = MAX_TARGETS; // (TODO) Make an argument
+    const uint8_t maxSourceFiles = MAX_SOURCE_FILES; // (TODO) Make an argument
 
     // Initialise constants
-    const long buildStartTime = getCurrentTimeStampMilliseconds();
+    const double buildStartTime = getCurrentTimeStampMilliseconds();
     int targetStartPercent = 0;
     // const int numTargets = rand() % maxTargets + 1;
-    const int numTargets = 3;
-    const int targetBuildPercent = 100 / numTargets;
+    const uint8_t numTargets = 3;
+    const double targetBuildPercent = 100.0 / (double)numTargets;
     const double scalingFactor = getScalingFactor(numTargets, totalBuildTime);
-    long targetBuildTime = INTIAL_TIME_STEP_MS;
+    // double targetBuildTime = totalBuildTime / numTargets;
+    double targetBuildTime = INTIAL_TIME_STEP_MS;
+    double targetEndBuildTime = buildStartTime + targetBuildTime;
     if(numTargets == 1) { targetBuildTime = totalBuildTime; }
     // double timeScalingFactor = getScalingFactor(1, buildTime);
 
-    printf("Dictionary Size: %d\n", dictSize);
-    printf("Start time: %d\n", targetStartPercent); // DEBUG
+    printf("Start time: %f\n", buildStartTime); // DEBUG
     printf("Time scaling factor: %f\n", scalingFactor); // DEBUG
-    printf("Build time: %ldms\n", totalBuildTime); // DEBUG
-    printf("Target build percent: %d%%\n", targetBuildPercent); // DEBUG
+    printf("Build time: %fms\n", totalBuildTime); // DEBUG
+    printf("Target build percent: %f%%\n", targetBuildPercent); // DEBUG
     printf("Number of targets: %d\n", numTargets); // DEBUG
 
     // Generate a random number of targets with random names pulled from a dictionary
@@ -62,15 +64,16 @@ main(int argc, char const *argv[])
     // printf("Should be 50%%: %d%%\n", updateBuildProgress(&targetStartPercent, buildTime));
     for(int i = 0; i < numTargets; i++)
     {
-        const long targetStartTime = getCurrentTimeStampMilliseconds();
-        printf("Target build time: %ld\n", targetBuildTime); // DEBUG
+        const double targetStartTime = getCurrentTimeStampMilliseconds(); // DEBUG
+        printf("\nTarget build time: %f\n", targetBuildTime); // DEBUG
         const char* targetName = dictionary[rand() % dictSize];
-        fakeBuildTarget(targetStartPercent, targetBuildPercent, targetBuildTime, targetName, maxSourceFiles);
+        fakeBuildTarget(targetStartPercent, targetBuildPercent, targetEndBuildTime, targetName, maxSourceFiles);
         targetBuildTime *= scalingFactor;
+        targetEndBuildTime += targetBuildTime;
         targetStartPercent += targetBuildPercent;
-        printf("Target time taken to completion: %ld\n", (getCurrentTimeStampMilliseconds() - targetStartTime));
+        printf("Target time taken to completion: %f\n", (getCurrentTimeStampMilliseconds() - targetStartTime));
     }
-    printf("Total time taken to completion: %ld\n", (getCurrentTimeStampMilliseconds() - buildStartTime));
+    printf("Total time taken to completion: %f\n", (getCurrentTimeStampMilliseconds() - buildStartTime));
 
     return 0;
 }
@@ -86,20 +89,20 @@ usleep(int milliseconds)
     nanosleep(&ts, NULL);
 }
 
-long
+double
 getCurrentTimeStampMilliseconds()
 {
     struct timespec _t;
     clock_gettime(CLOCK_REALTIME, &_t);
-    return _t.tv_sec*1000 + lround(_t.tv_nsec/1.0e6);
+    return _t.tv_sec*1000 + _t.tv_nsec/1.0e6;
 }
 
 double
-getScalingFactor(int nodes, int milliseconds)
+getScalingFactor(int nodes, double finalValue)
 {
     double scalingFactor, x, y;
-    x = INTIAL_TIME_STEP_MS/milliseconds;
-    y = 1.0/(nodes - 1.0);
+    x = INTIAL_TIME_STEP_MS/finalValue;
+    y = 1.0/((double)nodes - 1.0);
     scalingFactor = 1.0/(pow(x, y));
 
     return scalingFactor;
@@ -107,25 +110,28 @@ getScalingFactor(int nodes, int milliseconds)
 
 void
 fakeBuildTarget(
-    int startPercent,
-    int targetPercent,
-    long targetBuildTimeMilliseconds,
+    double startPercent,
+    double targetPercent,
+    double targetEndBuildTime,
     const char* targetName,
     int maxSourceFiles)
 {
     const uint8_t numSourceFiles = rand() % maxSourceFiles + 1;
-    int currentPercent = startPercent;
-    printf("Current percent: %d\n", currentPercent);
-    printf("Target percent: %d\n", targetPercent);
-    bool isStatic = true;
-    bool isLib = true;
+    const uint8_t numOperations = numSourceFiles + 1;
+    double currentPercent = startPercent;
+    printf("Current percent: %f\n", currentPercent);
+    printf("Target percent: %f\n", targetPercent);
+    bool isStatic = rand() % 2;
+    bool isLib = rand() % 2;
     char text[FORMAT_STRING_BUF_SIZE];
     // printf("build time: %d\n", (int)targetBuildTimeMilliseconds); // DEBUG
     // double timeScalingFactor = getScalingFactor(4, (int)targetBuildTimeMilliseconds);
     // const long targetBuildStartTime = getCurrentTimeStampMilliseconds();
-    long partBuildTime = targetBuildTimeMilliseconds / (numSourceFiles + 1);
-    int partBuildPercent = targetPercent / (numSourceFiles + 1);
-    printf("Part percent: %d\n", partBuildPercent);
+    const double targetStartBuildTime = getCurrentTimeStampMilliseconds();
+    const double partBuildTime = (targetEndBuildTime - targetStartBuildTime) / (double)numOperations;
+    const double partBuildPercent = targetPercent / (double)numOperations;
+    printf("Part percent: %f\n", partBuildPercent);
+    printf("Num operations: %d\n", numOperations);
     // printf("scaling factor: %f\n", timeScalingFactor); // DEBUG
     // int sleepTimeMilliseconds = INTIAL_TIME_STEP_MS;
     // sleepTimeMilliseconds *= timeScalingFactor;
@@ -133,10 +139,9 @@ fakeBuildTarget(
 
     sprintf(text, "Scanning dependencies of target %s\n", targetName);
     colourPrint(text, COLOUR_BOLD_MAGENTA);
-    usleep(partBuildTime);
 
     updateBuildProgress(&currentPercent, partBuildPercent);
-    printf("[%3d%%] ", currentPercent);
+    printf("[%3.0f%%] ", currentPercent);
     if (isLib)
     {
         sprintf(text, "Building C object CMakeFiles/%s.dir/%s.c.o\n", targetName, targetName);
@@ -146,7 +151,7 @@ fakeBuildTarget(
         sprintf(text, "Building C object CMakeFiles/%s.dir/%s.c.o\n", targetName, "main");
     }
     colourPrint(text, COLOUR_GREEN);
-    usleep(partBuildTime);
+    usleep(targetEndBuildTime - (numOperations - 1) * partBuildTime - getCurrentTimeStampMilliseconds());
 
     for (int i = 1; i < numSourceFiles; i++)
     {
@@ -154,13 +159,13 @@ fakeBuildTarget(
         // For source file need to follow pattern: TARGET_NAME/CMakeFiles/TARGETNAME.dir/SOURCE_FILE_NAME.c.o
         updateBuildProgress(&currentPercent, partBuildPercent);
         // printf("Progress: %d\n", currentPercent); // DEBUG
-        printf("[%3d%%] ", currentPercent);
+        printf("[%3.0f%%] ", currentPercent);
         const char* sourceFileName = dictionary[rand() % dictSize];
         sprintf(text, "Building C object CMakeFiles/%s.dir/%s.c.o\n", targetName, sourceFileName);
         colourPrint(text, COLOUR_GREEN);
         // sleepTimeMilliseconds *= timeScalingFactor;
         // printf("build time to sleep: %d\n", sleepTimeMilliseconds); // DEBUG
-        usleep(partBuildTime);
+        usleep(targetEndBuildTime - (numOperations - 1 - i) * partBuildTime - getCurrentTimeStampMilliseconds());
     }
 
     char targetNameLower[TEMP_STRING_BUF_SIZE]; // (TODO) Don't like this static array size
@@ -172,36 +177,36 @@ fakeBuildTarget(
 
     if(isLib && isStatic)
     {
-        printf("[%3d%%] ", currentPercent);
+        printf("[%3.0f%%] ", currentPercent);
         sprintf(text, "Linking C static library lib%s.a\n", targetNameLower);
         colourPrint(text, COLOUR_BOLD_GREEN);
     }
     else if (isLib)
     {
-        printf("[%3d%%] ", currentPercent);
+        printf("[%3.0f%%] ", currentPercent);
         sprintf(text, "Linking C shared library lib%s.so\n", targetNameLower);
         colourPrint(text, COLOUR_BOLD_GREEN);
     }
     else
     {
-        printf("[%3d%%] ", currentPercent);
+        printf("[%3.0f%%] ", currentPercent);
         sprintf(text, "Linking C executable %s\n", targetName);
         colourPrint(text, COLOUR_BOLD_GREEN);
     }
     // sleepTimeMilliseconds *= timeScalingFactor;
     // printf("build time to sleep: %d\n", sleepTimeMilliseconds); // DEBUG
-    usleep(partBuildTime);
+    usleep(targetEndBuildTime - getCurrentTimeStampMilliseconds());
     // printf("Progress: %d\n", currentPercent); // DEBUG
 
-    printf("[%3d%%] ", currentPercent);
+    printf("[%3.0f%%] ", currentPercent);
     printf("Built target %s\n", targetName);
 }
 
 void
-updateBuildProgress(int* startPercent, long buildPercent)
+updateBuildProgress(double* startPercent, double buildPercent)
 {
     *startPercent += buildPercent;
-    if(*startPercent > 100) { *startPercent = 100; }
+    if(*startPercent > 99.15) { *startPercent = 100; }
 }
 
 void
