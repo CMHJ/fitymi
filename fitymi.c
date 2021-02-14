@@ -7,15 +7,19 @@
 
 // My headers
 #include "fitymi.h"
+#include "dictionary.h"
 
 // Standard headers
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <unistd.h> // For sleep
 #include <time.h> // For nanosleep, and timestamping
 #include <math.h>
 #include <string.h> // For strcpy
 #include <ctype.h> // For tolower
+
+static const uint32_t dictSize = sizeof(dictionary) / sizeof(dictionary[0]);
 
 int
 main(int argc, char const *argv[])
@@ -23,14 +27,14 @@ main(int argc, char const *argv[])
     srand((unsigned)time(NULL)); // Seed random number generator
 
     // Parse arguments
-    long totalBuildTime = 100;
+    long totalBuildTime = 1000;
     if (argc == 2)
     {
        totalBuildTime = strtol(argv[1], (char **)NULL, 10);
        totalBuildTime *= 1000;
     }
-    const int maxTargets = 5; // (TODO) Make an argument
-    // const int maxSourceFiles    = 5; // (TODO) Make an argument
+    const uint8_t maxTargets = 5; // (TODO) Make an argument
+    const uint8_t maxSourceFiles = 5; // (TODO) Make an argument
 
     // Initialise constants
     const long buildStartTime = getCurrentTimeStampMilliseconds();
@@ -43,6 +47,7 @@ main(int argc, char const *argv[])
     if(numTargets == 1) { targetBuildTime = totalBuildTime; }
     // double timeScalingFactor = getScalingFactor(1, buildTime);
 
+    printf("Dictionary Size: %d\n", dictSize);
     printf("Start time: %d\n", targetStartPercent); // DEBUG
     printf("Time scaling factor: %f\n", scalingFactor); // DEBUG
     printf("Build time: %ldms\n", totalBuildTime); // DEBUG
@@ -59,7 +64,8 @@ main(int argc, char const *argv[])
     {
         const long targetStartTime = getCurrentTimeStampMilliseconds();
         printf("Target build time: %ld\n", targetBuildTime); // DEBUG
-        fakeBuildTarget(targetStartPercent, targetBuildPercent, targetBuildTime, "myLib", 1);
+        const char* targetName = dictionary[rand() % dictSize];
+        fakeBuildTarget(targetStartPercent, targetBuildPercent, targetBuildTime, targetName, maxSourceFiles);
         targetBuildTime *= scalingFactor;
         targetStartPercent += targetBuildPercent;
         printf("Target time taken to completion: %ld\n", (getCurrentTimeStampMilliseconds() - targetStartTime));
@@ -107,7 +113,7 @@ fakeBuildTarget(
     const char* targetName,
     int maxSourceFiles)
 {
-    const __uint8_t numSourceFiles = 1;
+    const uint8_t numSourceFiles = rand() % maxSourceFiles + 1;
     int currentPercent = startPercent;
     printf("Current percent: %d\n", currentPercent);
     printf("Target percent: %d\n", targetPercent);
@@ -129,13 +135,28 @@ fakeBuildTarget(
     colourPrint(text, COLOUR_BOLD_MAGENTA);
     usleep(partBuildTime);
 
-    for (int i = 0; i < numSourceFiles; i++){
+    updateBuildProgress(&currentPercent, partBuildPercent);
+    printf("[%3d%%] ", currentPercent);
+    if (isLib)
+    {
+        sprintf(text, "Building C object CMakeFiles/%s.dir/%s.c.o\n", targetName, targetName);
+    }
+    else
+    {
+        sprintf(text, "Building C object CMakeFiles/%s.dir/%s.c.o\n", targetName, "main");
+    }
+    colourPrint(text, COLOUR_GREEN);
+    usleep(partBuildTime);
+
+    for (int i = 1; i < numSourceFiles; i++)
+    {
         // Build random number of source files with target name plus random names picked from dictionary
         // For source file need to follow pattern: TARGET_NAME/CMakeFiles/TARGETNAME.dir/SOURCE_FILE_NAME.c.o
         updateBuildProgress(&currentPercent, partBuildPercent);
         // printf("Progress: %d\n", currentPercent); // DEBUG
         printf("[%3d%%] ", currentPercent);
-        sprintf(text, "Building C object %s/CMakeFiles/%s.dir/%s.c.o\n", targetName, targetName, targetName);
+        const char* sourceFileName = dictionary[rand() % dictSize];
+        sprintf(text, "Building C object CMakeFiles/%s.dir/%s.c.o\n", targetName, sourceFileName);
         colourPrint(text, COLOUR_GREEN);
         // sleepTimeMilliseconds *= timeScalingFactor;
         // printf("build time to sleep: %d\n", sleepTimeMilliseconds); // DEBUG
