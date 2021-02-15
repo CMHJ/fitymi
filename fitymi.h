@@ -4,9 +4,6 @@
  */
 
 // DEFINES
-
-#define _POSIX_C_SOURCE 199309L // To use the timestamp function in a POSIX way
-
 #define INTIAL_TIME_STEP_MS 1000.0
 #define FORMAT_STRING_BUF_SIZE 100
 #define TEMP_STRING_BUF_SIZE 50
@@ -60,6 +57,12 @@ updateBuildProgress(double* startPercent, double buildPercent);
 
 void
 colourPrint(const char* text, const char* colour);
+
+uint32_t*
+generateConstrainedRandomNumberSet(uint32_t n, uint32_t size);
+
+int
+cmpfunc (const void * a, const void * b);
 
 // TYPE DECLARATIONS
 

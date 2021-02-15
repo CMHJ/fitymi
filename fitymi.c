@@ -5,9 +5,8 @@
  * @todo need to make % complete relative to number of files being build rather than time
  */
 
-// My headers
-#include "fitymi.h"
-// #include "dictionary.h"
+// Defines
+#define _POSIX_C_SOURCE 199309L // To use the timestamp function in a POSIX way
 
 // Standard headers
 #include <stdio.h>
@@ -20,6 +19,10 @@
 #include <string.h> // For strcpy
 #include <ctype.h> // For tolower
 
+// My headers
+#include "fitymi.h"
+
+// External variables
 extern const char* dictionary[];
 extern const uint32_t dictSize;
 
@@ -27,6 +30,10 @@ int
 main(int argc, char const *argv[])
 {
     srand((unsigned)time(NULL)); // Seed random number generator
+
+    uint32_t* arr = generateConstrainedRandomNumberSet(4, 10);
+    for (int i = 0; i < 4; i++) printf("%d ", arr[i]);
+    printf("\n");
 
     // Parse arguments
     double totalBuildTime = 10000.0;
@@ -216,6 +223,39 @@ colourPrint(const char* text, const char* colour)
     printf("\033%s", colour);
     printf("%s", text);
     printf("\033[0m"); // Reset terminal output back to normal
+}
+
+uint32_t*
+generateConstrainedRandomNumberSet(uint32_t n, uint32_t size)
+{
+    // Generate dividers and sort
+    uint32_t arr2[n];
+    arr2[0] = 0;
+    uint32_t range[size-1];
+    for (int i = 1; i < size; i++) range[i] = i;
+    for (int i = 1; i < n; i++) arr2[i] = range[rand() % (size-1)];
+    qsort(arr2, n, sizeof(int32_t), cmpfunc);
+
+    // Create array to return
+    uint32_t* arr = malloc(sizeof(uint32_t) * n);
+    for (int i = 1; i < n; i++) arr[i-1] = arr2[i];
+    arr[n-1] = size;
+
+    // Perform final subtraction and return
+    for (int i = 0; i < 4; i++) printf("%d ", arr[i]);
+    printf("\n");
+    for (int i = 0; i < 4; i++) printf("%d ", arr2[i]);
+    printf("\n");
+    for (int i = 0; i < n; i++) arr[i] -= arr2[i];
+    for (int i = 0; i < 4; i++) printf("%d ", arr[i]);
+    printf("\n");
+    return arr;
+}
+
+int
+cmpfunc (const void * a, const void * b)
+{
+   return ( *(int*)a - *(int*)b );
 }
 
 // TYPE DEFINITIONS
