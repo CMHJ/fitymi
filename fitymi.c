@@ -7,7 +7,7 @@
 
 // My headers
 #include "fitymi.h"
-#include "dictionary.h"
+// #include "dictionary.h"
 
 // Standard headers
 #include <stdio.h>
@@ -20,7 +20,8 @@
 #include <string.h> // For strcpy
 #include <ctype.h> // For tolower
 
-static const uint32_t dictSize = sizeof(dictionary) / sizeof(dictionary[0]);
+extern const char* dictionary[];
+extern const uint32_t dictSize;
 
 int
 main(int argc, char const *argv[])
