@@ -31,11 +31,6 @@ main(int argc, char const *argv[])
 {
     srand((unsigned)time(NULL)); // Seed random number generator
 
-    uint32_t* arr = generateConstrainedRandomNumberSet(4, 10000);
-    for (int i = 0; i < 4; i++) printf("%d ", arr[i]);
-    printf("\n");
-    return 0;
-
     // Parse arguments
     double totalBuildTime = 10000.0;
     if (argc == 2)
@@ -52,16 +47,17 @@ main(int argc, char const *argv[])
     // const int numTargets = rand() % maxTargets + 1;
     const uint8_t numTargets = 3;
     const double targetBuildPercent = 100.0 / (double)numTargets;
-    const double scalingFactor = getScalingFactor(numTargets, totalBuildTime);
+    // const double scalingFactor = getScalingFactor(numTargets, totalBuildTime);
     // double targetBuildTime = totalBuildTime / numTargets;
-    double targetBuildTime = INTIAL_TIME_STEP_MS;
-    double targetEndBuildTime = buildStartTime + targetBuildTime;
-    if(numTargets == 1) { targetBuildTime = totalBuildTime; }
+    // double targetBuildTime = INTIAL_TIME_STEP_MS;
+    // if(numTargets == 1) { targetBuildTime = totalBuildTime; }
     // double timeScalingFactor = getScalingFactor(1, buildTime);
+    double targetBuildTime;
+    double targetEndBuildTime = buildStartTime;
 
     printf("Start time: %f\n", buildStartTime); // DEBUG
-    printf("Time scaling factor: %f\n", scalingFactor); // DEBUG
-    printf("Build time: %fms\n", totalBuildTime); // DEBUG
+    // printf("Time scaling factor: %f\n", scalingFactor); // DEBUG
+    printf("Total build time: %fms\n", totalBuildTime); // DEBUG
     printf("Target build percent: %f%%\n", targetBuildPercent); // DEBUG
     printf("Number of targets: %d\n", numTargets); // DEBUG
 
@@ -71,16 +67,20 @@ main(int argc, char const *argv[])
     // For all elements in the array build with exponentially scaling build time
 
     // printf("Should be 50%%: %d%%\n", updateBuildProgress(&targetStartPercent, buildTime));
+    uint32_t* targetBuildTimes = generateConstrainedRandomNumberSet(numTargets, totalBuildTime);
     for(int i = 0; i < numTargets; i++)
     {
+        targetBuildTime = targetBuildTimes[i];
+
         const double targetStartTime = getCurrentTimeStampMilliseconds(); // DEBUG
         printf("\nTarget build time: %f\n", targetBuildTime); // DEBUG
-        const char* targetName = dictionary[rand() % dictSize];
-        fakeBuildTarget(targetStartPercent, targetBuildPercent, targetEndBuildTime, targetName, maxSourceFiles);
-        targetBuildTime *= scalingFactor;
+
         targetEndBuildTime += targetBuildTime;
         targetStartPercent += targetBuildPercent;
-        printf("Target time taken to completion: %f\n", (getCurrentTimeStampMilliseconds() - targetStartTime));
+        const char* targetName = dictionary[rand() % dictSize];
+        fakeBuildTarget(targetStartPercent, targetBuildPercent, targetEndBuildTime, targetName, maxSourceFiles);
+
+        printf("Target time taken to completion: %f\n", (getCurrentTimeStampMilliseconds() - targetStartTime)); // DEBUG
     }
     printf("Total time taken to completion: %f\n", (getCurrentTimeStampMilliseconds() - buildStartTime));
 
