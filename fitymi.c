@@ -31,9 +31,10 @@ main(int argc, char const *argv[])
 {
     srand((unsigned)time(NULL)); // Seed random number generator
 
-    uint32_t* arr = generateConstrainedRandomNumberSet(4, 10);
+    uint32_t* arr = generateConstrainedRandomNumberSet(4, 10000);
     for (int i = 0; i < 4; i++) printf("%d ", arr[i]);
     printf("\n");
+    return 0;
 
     // Parse arguments
     double totalBuildTime = 10000.0;
@@ -226,20 +227,20 @@ colourPrint(const char* text, const char* colour)
 }
 
 uint32_t*
-generateConstrainedRandomNumberSet(uint32_t n, uint32_t size)
+generateConstrainedRandomNumberSet(uint32_t n, uint32_t total)
 {
     // Generate dividers and sort
     uint32_t arr2[n];
     arr2[0] = 0;
-    uint32_t range[size-1];
-    for (int i = 1; i < size; i++) range[i] = i;
-    for (int i = 1; i < n; i++) arr2[i] = range[rand() % (size-1)];
+    uint32_t range[total-1];
+    for (int i = 1; i < total; i++) range[i] = i;
+    for (int i = 1; i < n; i++) arr2[i] = range[rand() % (total-2) + 1];
     qsort(arr2, n, sizeof(int32_t), cmpfunc);
 
     // Create array to return
     uint32_t* arr = malloc(sizeof(uint32_t) * n);
     for (int i = 1; i < n; i++) arr[i-1] = arr2[i];
-    arr[n-1] = size;
+    arr[n-1] = total;
 
     // Perform final subtraction and return
     for (int i = 0; i < 4; i++) printf("%d ", arr[i]);
