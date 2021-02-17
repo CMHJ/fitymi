@@ -76,14 +76,15 @@ main(int argc, char const *argv[])
         printf("\nTarget build time: %f\n", targetBuildTime); // DEBUG
 
         targetEndBuildTime += targetBuildTime;
-        targetStartPercent += targetBuildPercent;
         const char* targetName = dictionary[rand() % dictSize];
         fakeBuildTarget(targetStartPercent, targetBuildPercent, targetEndBuildTime, targetName, maxSourceFiles);
+        targetStartPercent += targetBuildPercent;
 
         printf("Target time taken to completion: %f\n", (getCurrentTimeStampMilliseconds() - targetStartTime)); // DEBUG
     }
     printf("Total time taken to completion: %f\n", (getCurrentTimeStampMilliseconds() - buildStartTime));
 
+    free(targetBuildTimes);
     return 0;
 }
 
@@ -137,7 +138,9 @@ fakeBuildTarget(
     // double timeScalingFactor = getScalingFactor(4, (int)targetBuildTimeMilliseconds);
     // const long targetBuildStartTime = getCurrentTimeStampMilliseconds();
     const double targetStartBuildTime = getCurrentTimeStampMilliseconds();
-    const double partBuildTime = (targetEndBuildTime - targetStartBuildTime) / (double)numOperations;
+    double currentPartBuildTime = targetStartBuildTime;
+    uint32_t* partBuildTimes = generateConstrainedRandomNumberSet(numOperations, (uint32_t)(targetEndBuildTime - targetStartBuildTime));
+    // const double partBuildTime = (targetEndBuildTime - targetStartBuildTime) / (double)numOperations;
     const double partBuildPercent = targetPercent / (double)numOperations;
     printf("Part percent: %f\n", partBuildPercent);
     printf("Num operations: %d\n", numOperations);
@@ -160,7 +163,9 @@ fakeBuildTarget(
         sprintf(text, "Building C object CMakeFiles/%s.dir/%s.c.o\n", targetName, "main");
     }
     colourPrint(text, COLOUR_GREEN);
-    usleep(targetEndBuildTime - (numOperations - 1) * partBuildTime - getCurrentTimeStampMilliseconds());
+    // usleep(targetEndBuildTime - (numOperations - 1) * partBuildTime - getCurrentTimeStampMilliseconds());
+    currentPartBuildTime += partBuildTimes[0];
+    usleep(currentPartBuildTime - getCurrentTimeStampMilliseconds());
 
     for (int i = 1; i < numSourceFiles; i++)
     {
@@ -174,7 +179,9 @@ fakeBuildTarget(
         colourPrint(text, COLOUR_GREEN);
         // sleepTimeMilliseconds *= timeScalingFactor;
         // printf("build time to sleep: %d\n", sleepTimeMilliseconds); // DEBUG
-        usleep(targetEndBuildTime - (numOperations - 1 - i) * partBuildTime - getCurrentTimeStampMilliseconds());
+        // usleep(targetEndBuildTime - (numOperations - 1 - i) * partBuildTime - getCurrentTimeStampMilliseconds());
+        currentPartBuildTime += partBuildTimes[1];
+        usleep(currentPartBuildTime - getCurrentTimeStampMilliseconds());
     }
 
     char targetNameLower[TEMP_STRING_BUF_SIZE]; // (TODO) Don't like this static array size
@@ -209,6 +216,7 @@ fakeBuildTarget(
 
     printf("[%3.0f%%] ", currentPercent);
     printf("Built target %s\n", targetName);
+    free(partBuildTimes);
 }
 
 void
