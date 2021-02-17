@@ -22,12 +22,10 @@ Scanning dependencies of target myApp
 
 ## TODO List
 
-- Make the base program
-- Add colour to the text
+- Make the base program **done**
+- Add colour to the text **done**
 - Make argument parsing
     - To add options such as different build emulations i.e. emerge, ros build, etc.
     - To disable colours?
-- Add dictionary that pulls random words and strings them together to make up fake names for source files.
+- Add dictionary that pulls random words and strings them together to make up fake names for source files. **done**
 - Random node tree generation that emulates a folder structure full of files. Each folder is recusively entered until the bottom is hit where in the build then starts on each source file
-
-

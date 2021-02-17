@@ -4,12 +4,11 @@
  */
 
 // DEFINES
-#define INTIAL_TIME_STEP_MS 1000.0
+#define MAX_TARGETS 50
+#define MAX_SOURCE_FILES 30
+#define MAX_DEFAULT_BUILD_TIME 300000 // 5 mins in ms
 #define FORMAT_STRING_BUF_SIZE 100
 #define TEMP_STRING_BUF_SIZE 50
-#define MAX_TARGETS 10
-#define MAX_SOURCE_FILES 20
-#define MAX_TARGET_BUILD_TIME 300000 // 5 mins in ms
 
 // Colours
 #define COLOUR_GREEN "[0;32m"
@@ -33,8 +32,8 @@ getCurrentTimeStampMilliseconds();
  * @param seconds the desired build time
  * @return scaling factor to multiply sleep time by each build step
  */
-double
-getScalingFactor(int nodes, double duration);
+// double
+// getScalingFactor(int nodes, double duration);
 
 /**
  * Generate the fake file system to "build" full of files and folder
